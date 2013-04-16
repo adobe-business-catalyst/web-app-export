@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "BC Web app config import/export",
+  "description": "This extension make BC web apps importing/exporting easier",
+  "version": "1.0",
+  "background": { "scripts": ["scripts/background.min.js"] },
+  "permissions": ["tabs"],
+  "icons":{
+    "48":"assets/img/logo_48.png"
+  },
+  "page_action": {
+    "default_icon": {
+      "19":"assets/img/logo.png"
+    },
+    "default_title": "BC Web app export/import utility",
+    "default_popup": "index.html"
+  },
+  "content_scripts" : [
+    {
+      "matches" : [
+        "http://*/AdminConsole/*",
+        "https://*/AdminConsole/*"
+      ],
+      "js" : [
+        "scripts/contentscript-libs.js",
+        "scripts/contentscript.min.js"
+      ],
+      "run_at" : "document_idle",
+      "all_frames" : false
+    }
+  ]
+}

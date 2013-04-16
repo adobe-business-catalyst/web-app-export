@@ -1,0 +1,51 @@
+<form class="span8">
+  <fieldset>
+    <legend>Web Apps Export/Import utility</legend>
+    <div class="alert" ng-class="message.css || 'alert-info'" ng-show="message">
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+      <i class="icon-spinner icon-spin pull-left" ng-show="loading"></i>
+      {{message.text}}
+    </div>
+    <ul class="nav nav-tabs" id="WebAppTabs">
+      <li ng-class="{active:webApp.id != -1}" ng-show="webApp.id != -1">
+        <a href="#export" data-toggle="tab" ng-click="reset($event)">Export</a>
+      </li>
+      <li ng-class="{active:webApp.id == -1}">
+        <a href="#import" data-toggle="tab" ng-click="reset($event)">Import</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane" id="export" ng-class="{active:webApp.id != -1}" ng-show="webApp.id != -1">
+        <p>
+          Export <b>{{webApp.name}}</b> settings.
+        </p>
+        <textarea ng-model="webAppSettings" class="input-block-level" rows="8" ng-show="webAppSettings"></textarea>
+        <div class="form-actions">
+          <button class="btn btn-primary" ng-disabled="webApp == null || loading || webApp.id == -1" ng-click="export()">
+            <i class="icon-white icon-download"></i>
+            Export
+          </button>
+        </div>
+      </div>
+      
+      <div class="tab-pane" id="import" ng-class="{active:webApp.id == -1}">
+        <div class="alert" ng-show="webApp.id != -1">
+          <h4>Warning!</h4>
+          Importing data over an existing web app will overwrite the current configuration!
+        </div>
+        
+        <p>
+          Paste bellow the JSON configuration of the web app you want to import and 
+          click the <b><i>Import</i></b> button.
+        </p>
+        <textarea ng-model="importSettings" class="input-block-level" rows="8"></textarea>
+        <div class="form-actions">
+          <button class="btn btn-success" ng-disabled="loading || importSettings == null" ng-click="import()">
+            <i class="icon-white icon-upload"></i>
+            Import
+          </button>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+</form>
