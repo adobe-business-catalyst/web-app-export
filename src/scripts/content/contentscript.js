@@ -1,5 +1,6 @@
 // Helper function to extract query string params
 function unserialize(p){
+  if(!p) return {};
   var ret = {},
       seg = p.replace(/^\?/,'').split('&'),
       len = seg.length, i = 0, s;
@@ -49,10 +50,13 @@ $(document).ready(function(){
     }
   }
   
-  
   chrome.runtime.onConnect.addListener(onConnect);
-  
+  /*
+  chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse){
+    console.log("Cucu",msg);
+    sendResponse("contentscript");
+  })
+*/
 });
-
 
 

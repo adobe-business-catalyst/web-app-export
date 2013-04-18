@@ -19,7 +19,9 @@
     {
       "matches" : [
         "http://*/AdminConsole/*",
-        "https://*/AdminConsole/*"
+        "http://*/AdminConsoleXT/*",
+        "https://*/AdminConsole/*",
+        "https://*/AdminConsoleXT/*"
       ],
       "js" : [
         "scripts/contentscript-libs.js",

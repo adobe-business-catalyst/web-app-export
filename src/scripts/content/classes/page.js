@@ -36,7 +36,6 @@ Page.methods({
         // Read the api base url and delete the input.
         this.apiUrl = $('#__siteApiBaseUrl').val() ? "https://"+ $('#__siteApiBaseUrl').val() : null;
         $('#__siteApiBaseUrl').remove();
-        console.log(this.apiUrl, this.siteID);
     },
     
     getContentType:function(){
@@ -44,6 +43,8 @@ Page.methods({
         // Check if we are on the Web App edit/create page
         if(this.frame && this.frame.location.pathname.indexOf("/Admin/CustomContentType.aspx") > -1){
           this.worker.postMessage({event:"Page:getContentType", data:Page.WEB_APP});
+        }else{
+          this.worker.postMessage({event:"Page:getContentType", data:null});
         }
     },
     
@@ -57,7 +58,6 @@ Page.methods({
       }
       
       inputs.each(function(){
-        
         if( $(this).is('input[type=text]') || $(this).is('textarea') || $(this).is('select')){
           result[$(this).attr('id')] = $(this).val();
         }

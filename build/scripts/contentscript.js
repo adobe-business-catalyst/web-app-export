@@ -36,7 +36,6 @@ Page.methods({
         // Read the api base url and delete the input.
         this.apiUrl = $('#__siteApiBaseUrl').val() ? "https://"+ $('#__siteApiBaseUrl').val() : null;
         $('#__siteApiBaseUrl').remove();
-        console.log(this.apiUrl, this.siteID);
     },
     
     getContentType:function(){
@@ -44,6 +43,8 @@ Page.methods({
         // Check if we are on the Web App edit/create page
         if(this.frame && this.frame.location.pathname.indexOf("/Admin/CustomContentType.aspx") > -1){
           this.worker.postMessage({event:"Page:getContentType", data:Page.WEB_APP});
+        }else{
+          this.worker.postMessage({event:"Page:getContentType", data:null});
         }
     },
     
@@ -57,7 +58,6 @@ Page.methods({
       }
       
       inputs.each(function(){
-        
         if( $(this).is('input[type=text]') || $(this).is('textarea') || $(this).is('select')){
           result[$(this).attr('id')] = $(this).val();
         }
@@ -505,6 +505,7 @@ WebApp.methods({
 
 // Helper function to extract query string params
 function unserialize(p){
+  if(!p) return {};
   var ret = {},
       seg = p.replace(/^\?/,'').split('&'),
       len = seg.length, i = 0, s;
@@ -554,10 +555,13 @@ $(document).ready(function(){
     }
   }
   
-  
   chrome.runtime.onConnect.addListener(onConnect);
-  
+  /*
+  chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse){
+    console.log("Cucu",msg);
+    sendResponse("contentscript");
+  })
+*/
 });
-
 
 
