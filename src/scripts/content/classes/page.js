@@ -6,26 +6,39 @@ var Page = klass(function(worker){
 * Statics
 */
 Page.statics({
-  WEB_APP:"WebApp",
-  API_BASE_URL: "https://api-bc.testsecure.com" 
+  WEB_APP:"WebApp"
 });
 
 Page.methods({
     init:function(){
-        if(document.getElementsByTagName('iframe').length){
-          this.frame = document.getElementsByTagName('iframe')[0].contentWindow
-          this.frameDoc = this.frame.document
+        if( !document.getElementsByTagName('iframe').length )
+          return;
           
-          // Extract auth token from the cookie
-          this.authToken = $.cookie('siteAuthToken'); 
-          
-          // Extract site ID from any of ANONID_FS<siteID>, GEID<siteID>, ASESSID<siteID> cookies 
-          var matches = /ANONID_FS([0-9]+)|GEID([0-9]+)|ASESSID([0-9]+)/g.exec(document.cookie);
-          if(matches && matches.length){
-            this.siteID = matches[1];
-          }
-        }
+        this.frame = document.getElementsByTagName('iframe')[0].contentWindow
+        this.frameDoc = this.frame.document
+        
+        // Extract auth token from the cookie
+        $.cookie.raw = true;
+        this.authToken = $.cookie('siteAuthToken'); 
+        
+        // Extract the siteID from partner portal link :D
+        var urlParams = unserialize($('#PPLink', $(this.frameDoc)).attr("href"));
+        if(urlParams.hasOwnProperty("ASID"))
+          this.siteID = urlParams.ASID
+        
+        // Hack. Retrieve the API base url.
+        // Inject an script into the page, that reads the authData.apiUrl var and
+        // creates an input with this value, read it and deletes the input.
+        var script = document.createElement("script");
+        script.textContent = "if(authData && authData.hasOwnProperty('apiUrl')){ var input= document.createElement('input'); input.id='__siteApiBaseUrl'; input.type='text'; input.value = authData.apiUrl; document.body.appendChild(input);}";
+        document.body.appendChild(script);
+        
+        // Read the api base url and delete the input.
+        this.apiUrl = $('#__siteApiBaseUrl').val() ? "https://"+ $('#__siteApiBaseUrl').val() : null;
+        $('#__siteApiBaseUrl').remove();
+        console.log(this.apiUrl, this.siteID);
     },
+    
     getContentType:function(){
         this.init();
         // Check if we are on the Web App edit/create page

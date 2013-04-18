@@ -6,26 +6,39 @@ var Page = klass(function(worker){
 * Statics
 */
 Page.statics({
-  WEB_APP:"WebApp",
-  API_BASE_URL: "https://api-bc.testsecure.com" 
+  WEB_APP:"WebApp"
 });
 
 Page.methods({
     init:function(){
-        if(document.getElementsByTagName('iframe').length){
-          this.frame = document.getElementsByTagName('iframe')[0].contentWindow
-          this.frameDoc = this.frame.document
+        if( !document.getElementsByTagName('iframe').length )
+          return;
           
-          // Extract auth token from the cookie
-          this.authToken = $.cookie('siteAuthToken'); 
-          
-          // Extract site ID from any of ANONID_FS<siteID>, GEID<siteID>, ASESSID<siteID> cookies 
-          var matches = /ANONID_FS([0-9]+)|GEID([0-9]+)|ASESSID([0-9]+)/g.exec(document.cookie);
-          if(matches && matches.length){
-            this.siteID = matches[1];
-          }
-        }
+        this.frame = document.getElementsByTagName('iframe')[0].contentWindow
+        this.frameDoc = this.frame.document
+        
+        // Extract auth token from the cookie
+        $.cookie.raw = true;
+        this.authToken = $.cookie('siteAuthToken'); 
+        
+        // Extract the siteID from partner portal link :D
+        var urlParams = unserialize($('#PPLink', $(this.frameDoc)).attr("href"));
+        if(urlParams.hasOwnProperty("ASID"))
+          this.siteID = urlParams.ASID
+        
+        // Hack. Retrieve the API base url.
+        // Inject an script into the page, that reads the authData.apiUrl var and
+        // creates an input with this value, read it and deletes the input.
+        var script = document.createElement("script");
+        script.textContent = "if(authData && authData.hasOwnProperty('apiUrl')){ var input= document.createElement('input'); input.id='__siteApiBaseUrl'; input.type='text'; input.value = authData.apiUrl; document.body.appendChild(input);}";
+        document.body.appendChild(script);
+        
+        // Read the api base url and delete the input.
+        this.apiUrl = $('#__siteApiBaseUrl').val() ? "https://"+ $('#__siteApiBaseUrl').val() : null;
+        $('#__siteApiBaseUrl').remove();
+        console.log(this.apiUrl, this.siteID);
     },
+    
     getContentType:function(){
         this.init();
         // Check if we are on the Web App edit/create page
@@ -219,6 +232,7 @@ WebApp.methods({
   exportLayoutTab:function(e){
     this.init();
     $('iframe:first').unbind('load');
+    
     this.worker.postMessage({
       event:"Page:status", 
       data:{
@@ -228,13 +242,17 @@ WebApp.methods({
     
     var data = e.data
         , self = this
-        , baseURL = Page.API_BASE_URL+"/api/v2/admin/sites/"+self.siteID+"/storage/Layouts/WebApps/"+encodeURIComponent($('#main h1 span').text())
+        , baseURL = self.apiUrl+"/api/v2/admin/sites/"+self.siteID+"/storage/Layouts/WebApps/"+encodeURIComponent($('#main h1 span').text())
         , getTemplate;
     
     $('iframe:first').bind('load',data, $.proxy(this.exportAutoresponderTab, this));
+    if( self.apiUrl == undefined || self.apiUrl == ""){
+      // Skip the layout export if API_BASE_URL was not detected
+      self.navigate(3);
+    }
     
     getTemplate = function(tpl, cb){
-        $.ajax({
+      $.ajax({
         url: baseURL+"/"+tpl+".html",
         headers:{ Authorization:self.authToken },
         
@@ -251,6 +269,7 @@ WebApp.methods({
     
     // Get templates
     self.worker.postMessage({event:"Page:status", data:{text:"Exporting list layout" }});
+    
     getTemplate("list", function(){
       self.worker.postMessage({event:"Page:status", data:{text:"Exporting detail layout" }});
       getTemplate("detail", function(){
@@ -420,12 +439,17 @@ WebApp.methods({
     $('#systemNotificationQueue').unbind('DOMSubtreeModified');
     
     var data = e.data
-        ,self = this
-        ,context = $(this.frameDoc)
-        , baseURL = Page.API_BASE_URL+"/api/v2/admin/sites/"+self.siteID+"/storage/Layouts/WebApps/"+encodeURIComponent($('#main h1 span').text())
+        , self = this
+        , context = $(this.frameDoc)
+        , baseURL = self.apiUrl+"/api/v2/admin/sites/"+self.siteID+"/storage/Layouts/WebApps/"+encodeURIComponent($('#main h1 span').text())
         , saveTemplate;
         
     $('iframe:first').bind('load',data, $.proxy(this.importAutoresponderTab, this));
+    
+    if( self.apiUrl == undefined || self.apiUrl == "" ){
+      // Skip the layout import if API_BASE_URL was not detected
+      self.navigate(3);
+    }
     
     saveTemplate = function(tpl, cb){
         $.ajax({
@@ -435,9 +459,7 @@ WebApp.methods({
         processData:false,
         contentType:"application/octet-stream",
         data:data.layout[tpl],
-        success:function(response){
-          cb()
-        }
+        success: cb
       });
     }
     
@@ -481,7 +503,7 @@ WebApp.methods({
 });
 
 
-// Helper functions
+// Helper function to extract query string params
 function unserialize(p){
   var ret = {},
       seg = p.replace(/^\?/,'').split('&'),
@@ -494,38 +516,48 @@ function unserialize(p){
   return ret;
 }
 
+// And the magic begins...
 $(document).ready(function(){
+  var worker = null;
+  
+  // Dispatch messages
+  var onMessage = function(msg){
+    // The message dispatcher
+    // msg.action is in the form of className:methodName (Eg. Page:getContentType)
+    if( !msg.action )
+      return;
+    
+    var info = msg.action.split(":");
+    if(info.length != 2)
+      return;
+    
+    var className = info[0]
+        , methodName = info[1]
+    
+    // If class not exists exit.
+    if( !window[className])
+      return;
+    
+    // Create an instance of class name
+    
+    var controller = new window[className](worker);
+    if(controller[methodName] != undefined && typeof controller[methodName] === 'function'){
+      controller[methodName].apply(controller, msg.argv);
+    }
+  }
+  
+  // When connected, listen for messages
+  var onConnect = function(port){
+    if(port.name == "BC"){
+      worker = port;
+      worker.onMessage.addListener(onMessage);
+    }
+  }
+  
+  
   chrome.runtime.onConnect.addListener(onConnect);
+  
 });
 
-var onConnect = function(worker){
-   
-    if(worker.name == "BC"){
-      worker.onMessage.addListener(function(msg){
-        // The message dispatcher
-        // msg.action is in the form of className:methodName (Eg. Page:getContentType)
-        if( !msg.action )
-          return;
-        
-        var info = msg.action.split(":");
-        if(info.length != 2)
-          return;
-        
-        var className = info[0]
-            , methodName = info[1]
-        
-        // If class not exists exit.
-        if( !window[className])
-          return;
-        
-        // Create an instance of class name
-        
-        var controller = new window[className](worker);
-        if(controller[methodName] != undefined && typeof controller[methodName] === 'function'){
-          controller[methodName].apply(controller, msg.argv);
-        }
-        
-      })
-    }
-}
+
 

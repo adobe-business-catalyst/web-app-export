@@ -3,10 +3,9 @@ function init(tabId, changeInfo, tab) {
   chrome.pageAction.hide(tabId);
   
   if (tab.url.indexOf('CustomContentType.aspx') > -1) {
-  //if (tab.url.indexOf('AdminConsole') > -1) {
-    chrome.pageAction.show(tab.id);
+    chrome.pageAction.show(tabId);
   }
+  
 };
 
 chrome.tabs.onUpdated.addListener(init);
-

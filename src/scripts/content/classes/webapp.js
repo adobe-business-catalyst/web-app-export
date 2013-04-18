@@ -139,6 +139,7 @@ WebApp.methods({
   exportLayoutTab:function(e){
     this.init();
     $('iframe:first').unbind('load');
+    
     this.worker.postMessage({
       event:"Page:status", 
       data:{
@@ -148,13 +149,17 @@ WebApp.methods({
     
     var data = e.data
         , self = this
-        , baseURL = Page.API_BASE_URL+"/api/v2/admin/sites/"+self.siteID+"/storage/Layouts/WebApps/"+encodeURIComponent($('#main h1 span').text())
+        , baseURL = self.apiUrl+"/api/v2/admin/sites/"+self.siteID+"/storage/Layouts/WebApps/"+encodeURIComponent($('#main h1 span').text())
         , getTemplate;
     
     $('iframe:first').bind('load',data, $.proxy(this.exportAutoresponderTab, this));
+    if( self.apiUrl == undefined || self.apiUrl == ""){
+      // Skip the layout export if API_BASE_URL was not detected
+      self.navigate(3);
+    }
     
     getTemplate = function(tpl, cb){
-        $.ajax({
+      $.ajax({
         url: baseURL+"/"+tpl+".html",
         headers:{ Authorization:self.authToken },
         
@@ -171,6 +176,7 @@ WebApp.methods({
     
     // Get templates
     self.worker.postMessage({event:"Page:status", data:{text:"Exporting list layout" }});
+    
     getTemplate("list", function(){
       self.worker.postMessage({event:"Page:status", data:{text:"Exporting detail layout" }});
       getTemplate("detail", function(){
@@ -340,12 +346,17 @@ WebApp.methods({
     $('#systemNotificationQueue').unbind('DOMSubtreeModified');
     
     var data = e.data
-        ,self = this
-        ,context = $(this.frameDoc)
-        , baseURL = Page.API_BASE_URL+"/api/v2/admin/sites/"+self.siteID+"/storage/Layouts/WebApps/"+encodeURIComponent($('#main h1 span').text())
+        , self = this
+        , context = $(this.frameDoc)
+        , baseURL = self.apiUrl+"/api/v2/admin/sites/"+self.siteID+"/storage/Layouts/WebApps/"+encodeURIComponent($('#main h1 span').text())
         , saveTemplate;
         
     $('iframe:first').bind('load',data, $.proxy(this.importAutoresponderTab, this));
+    
+    if( self.apiUrl == undefined || self.apiUrl == "" ){
+      // Skip the layout import if API_BASE_URL was not detected
+      self.navigate(3);
+    }
     
     saveTemplate = function(tpl, cb){
         $.ajax({
@@ -355,9 +366,7 @@ WebApp.methods({
         processData:false,
         contentType:"application/octet-stream",
         data:data.layout[tpl],
-        success:function(response){
-          cb()
-        }
+        success: cb
       });
     }
     
