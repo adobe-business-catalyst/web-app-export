@@ -197,6 +197,7 @@ WebApp.methods({
     $('iframe:first').unbind('load');
     var data = e.data;
     data.autoresponder = this.extractInputs($('.main', $(this.frameDoc)));
+    // TODO: Include rad editor controls to extractInputs method
     data.autoresponder['ctl00_cp_uc_reContentHiddenTextarea'] = $('#ctl00_cp_uc_reContentHiddenTextarea', $(this.frameDoc)).val();
     
     this.worker.postMessage({
@@ -383,6 +384,18 @@ WebApp.methods({
     })
         
   },
+  setEditorContent:function(editorID, content, doc){
+    var script = document.createElement("script")
+        , escapedContent = content ? content.replace("'", "\'") :"";
+    
+    script.textContent = "if(window.$find){"+
+    "var editor=$find('"+editorID+"')"+
+    " if(editor){"+
+    "   editor.set_html('"+escapedContent+"')"+
+    " }"+
+    "}";
+    doc.body.appendChild(script);
+  },
   
   importAutoresponderTab:function(e){
     this.init();
@@ -392,11 +405,22 @@ WebApp.methods({
         ,self = this
         ,context = $(this.frameDoc)
         
-    if( data.autoresponder){
-      this.setInputs(data.autoresponder, context);
-      $('#ctl00_cp_uc_btnSubmit', context).trigger('click');
+    if(!data.autoresponder){
+      this.worker.postMessage({
+        event:"Page:status", 
+        data:{
+          text:"Web app imported successfully!",
+          css: "alert-success"
+        }
+      });  
+      this.worker.postMessage({ event:"WebApp:importSettings" });
+      return;
     }
     
+    this.setInputs(data.autoresponder, context);
+    this.setEditorContent('ctl00_cp_uc_re', data.autoresponder['ctl00_cp_uc_reContentHiddenTextarea'], this.frameDoc);
+    $('#ctl00_cp_uc_btnSubmit', context).trigger('click');
+  
     this.worker.postMessage({
       event:"Page:status", 
       data:{
@@ -405,7 +429,6 @@ WebApp.methods({
       }
     });  
     this.worker.postMessage({ event:"WebApp:importSettings" });
-    
   }
 });
 

@@ -49,14 +49,8 @@ $(document).ready(function(){
       worker.onMessage.addListener(onMessage);
     }
   }
-  
   chrome.runtime.onConnect.addListener(onConnect);
-  /*
-  chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse){
-    console.log("Cucu",msg);
-    sendResponse("contentscript");
-  })
-*/
+  
 });
 
 

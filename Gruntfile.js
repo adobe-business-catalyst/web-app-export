@@ -48,13 +48,12 @@ module.exports = function(grunt) {
           'build/scripts/background.min.js':['src/scripts/content/background.js']
         }
       }
-      
     },
     copy:{
       main:{
         files:[
           {
-            src:['assets/**', 'tpl/**', 'manifest.json', 'index.html'],
+            src:['assets/**', 'tpl/**', 'scripts/page/*', 'manifest.json', 'index.html'],
             dest:'build/',
             cwd:'src/',
             expand:true
