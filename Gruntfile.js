@@ -53,7 +53,7 @@ module.exports = function(grunt) {
       main:{
         files:[
           {
-            src:['assets/**', 'tpl/**', 'scripts/page/*', 'manifest.json', 'index.html'],
+            src:['assets/**', 'tpl/**', 'manifest.json', 'index.html'],
             dest:'build/',
             cwd:'src/',
             expand:true

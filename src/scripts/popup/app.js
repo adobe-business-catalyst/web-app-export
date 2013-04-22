@@ -25,9 +25,9 @@ BC.run(['$rootScope','$location', function($rootScope, $location){
     var worker = chrome.tabs.connect(tab.id, {name: "BC"});
     
     worker.onMessage.addListener(function(msg){
-        if(msg && msg.event){
-          $rootScope.$broadcast(msg.event, msg.data);
-        }
+      if(msg && msg.event){
+        $rootScope.$broadcast(msg.event, msg.data);
+      }
     });
     
     // Overwrite the send message method

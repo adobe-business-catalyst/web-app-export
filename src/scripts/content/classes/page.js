@@ -30,92 +30,142 @@ Page.methods({
         // Hack. Retrieve the API base url.
         // Inject an script into the page, that reads the authData.apiUrl var and
         // creates an input with this value, reads it and deletes the input.
-        
-        this.injectScript("scripts/page/get_api_url.js", document.body, function(){
-          // Read the api base url and delete the input.
-          self.apiUrl = $('#__siteApiBaseUrl').val() ? "https://"+ $('#__siteApiBaseUrl').val() : null;
-          $('#__siteApiBaseUrl').remove();
-        });
-        
+        this.injectScript(function(){
+          try{
+            if(window.authData && window.authData.hasOwnProperty('apiUrl')){ 
+              var input= document.createElement('input'); 
+              input.id='__siteApiBaseUrl'; 
+              input.type='text'; 
+              input.value = authData.apiUrl; 
+              document.body.appendChild(input);
+            }
+          }catch(e){
+            console.error(e)
+          }
+        }, document.body);
+        // Get the api url and clean up after
+        this.apiUrl = $('#__siteApiBaseUrl').val() ? "https://"+ $('#__siteApiBaseUrl').val() : null;
+        $('#__siteApiBaseUrl').remove();
     },
     /*
     * Injects an script into content page.
-    * @scriptUrl script url
+    * @script content
     * @context document where the script will be injected, default the current document
-    * @callback callback method to be run after the script is injected
-    * @callbackArguments additional callback method params
+    * @scriptArguments additional arguments as string
+    * returns the script object.
     */
-    injectScript:function(scriptUrl, context, callback, callbackArguments){
+    injectScript:function( content, context, scriptArguments){
       var s = document.createElement('script')
-          , self = this
           , context = context || document
-          , callbackArguments = callbackArguments || [];
+          , scriptArguments = scriptArguments || "";
           
-      s.src = chrome.extension.getURL(scriptUrl);
-      s.onload = function(){
-        if(callback)
-          callback.apply(self, callbackArguments);
-        // Remove the injected script  
-        this.parentNode.removeChild(this);
-      }
+      s.textContent = '('+content+')('+scriptArguments+');';
       context.appendChild(s);
+      s.parentNode.removeChild(s);
     },
     
     getContentType:function(){
-        this.init();
-        // Check if we are on the Web App edit/create page
-        if(this.frame && this.frame.location && this.frame.location.pathname.indexOf("/Admin/CustomContentType.aspx") > -1){
-          this.worker.postMessage({event:"Page:getContentType", data:Page.WEB_APP});
-        }else{
-          this.worker.postMessage({event:"Page:getContentType", data:null});
-        }
+      this.init();
+      
+      if( this.frame == null ){
+        this.worker.postMessage({event:"Page:getContentType", data:null});
+        return;
+      }
+      
+      var url = this.frame.location.href;
+      
+      // Check if we are on the Web App edit/create page
+      if( url && /Admin\/CustomContentType.aspx\?CustomContentID\=\d/.test(url)){
+        this.worker.postMessage({event:"Page:getContentType", data:Page.WEB_APP});
+        return;
+      }
+      this.worker.postMessage({event:"Page:getContentType", data:null});
     },
     
     // Extract inputs from a container element
     extractInputs: function( from ){
       var result = {}
           , inputs
+          , from = from || $(this.frameDoc)
+          
+      this.injectScript(function(){
+        try{
+          if (typeof (window.$telerik) != 'undefined') {
+            if (window.$telerik.radControls && Telerik.Web.UI.RadEditor) {
+              for (var i = 0, l = $telerik.radControls.length; i < l; i++) {
+                var control = $telerik.radControls[i];
+                if (Telerik.Web.UI.RadEditor.isInstanceOfType(control)) {
+                  var editor = control;
+                  var radInput = document.createElement('input');
+                  radInput.type="text";
+                  radInput.setAttribute('data-rad-id', editor.get_id())
+                  radInput.className = 'injected-rad-editor-input';
+                  radInput.value = editor.get_html();
+                  document.body.appendChild(radInput);
+                }
+              }
+            }
+          }
+        }catch(e){
+          console.log(e)
+        }
+      }, this.frameDoc.body);
       
-      // Inject script to extract rad editor contents
-      this.injectScript("scripts/page/get_rad_controls.js", this.frameDoc.body);
-        
-      inputs = $('input:visible, textarea:visible, select:visible, input.injected-rad-editor-input', from).filter(':enabled');
-      console.log($('input.injected-rad-editor-input').val());
-      
+      inputs = $('input:visible, textarea:visible, select:visible', from).filter(':enabled');
+
       if( inputs.length == 0){
         return;
       }
       
       inputs.each(function(){
         if( $(this).is('input[type=text]') || $(this).is('textarea') || $(this).is('select')){
-          result[$(this).attr('id')] = $(this).val();
+          if($(this).is('.injected-rad-editor-input')){
+            if( !result.hasOwnProperty('rad')){
+              result.rad={}
+            }
+            result.rad[$(this).attr('data-rad-id')] = $(this).val();
+          }else{
+            result[$(this).attr('id')] = $(this).val();
+          }
         }
         
         if( $(this).is('input[type=checkbox]') || $(this).is('input[type=radio]')){
           result[$(this).attr('id')] = $(this).attr('checked') == 'checked' ? true : false;
         }
-        
       });
       
-      
+      $('.injected-rad-editor-input', $(this.frameDoc)).remove()
       return result;
     },
     
     // Helper method. Set inputs value from imported data
     setInputs: function(data, context){
+      var self = this;
+      
       $.each(data, function(k, val){
-        var id ="#"+k;
-        
-        if( $(id, context).is('input[type=text]') || $(id, context).is('textarea') || $(id, context).is('select')){
-          $(id, context).val(val);
+        if(k == "rad"){
+           // Set rad editor content if available
+          $.each(data.rad, function(radId, radValue){
+            self.injectScript(function(id, val){
+              if(window.$find){
+                var editor = $find(id);
+                if(editor){
+                  editor.set_html(val);
+                }
+              }
+            }, self.frameDoc.body, "'"+radId+"','"+radValue.replace("'","\'")+"'");
+          });
+        }else{
+          var id ="#"+k;
+          
+          if( $(id, context).is('input[type=text]') || $(id, context).is('textarea') || $(id, context).is('select')){
+            $(id, context).val(val);
+          }
+          
+          if( $(id, context).is('input[type=checkbox]') || $(id, context).is('input[type=radio]')){
+            $(id, context).attr('checked', val)
+          }
         }
-        
-        if( $(id, context).is('input[type=checkbox]') || $(id, context).is('input[type=radio]')){
-          $(id, context).attr('checked', val)
-        }
-        
-        // Set rad editor content if available
-        
       })
     }
 });
