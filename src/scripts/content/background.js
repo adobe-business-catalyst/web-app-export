@@ -13,7 +13,7 @@ function showIcon(url){
   var urlInfo = parse_url(url);
   
   // WebApp edit/create page
-  if(urlInfo.fragment && /\!\/Admin\/CustomContentType.aspx\?CustomContentID\=\d/.test(urlInfo.fragment))
+  if(urlInfo.fragment && /\!\/Admin\/CustomContentType.aspx\?CustomContentID\=\-?\d/.test(urlInfo.fragment))
     return true;
   return false
 }
