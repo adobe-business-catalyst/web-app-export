@@ -23,7 +23,7 @@ To create this extension we used:
 * [jQuery](http://jquery.com/) for DOM manipulation 
 * [Klass](https://github.com/ded/klass) for basic OOP 
 * [jQuery Cookie plugin](https://github.com/carhartl/jquery-cookie) for cookie manipulation
-* [AngulaJS](http://angularjs.org/)
+* [AngularJS](http://angularjs.org/)
 * [Twitter Bootstrap](http://twitter.github.io/bootstrap/) for UI
 * [Font Awesome](http://fortawesome.github.com/Font-Awesome/) for cool icons
 
