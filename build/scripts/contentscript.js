@@ -377,7 +377,7 @@ WebApp.methods({
     this.worker.postMessage({
       event:"Page:status", 
       data:{
-        text:$('#main h1 span').text() +" exported successfully! Copy the export data and import it into a new website.", 
+        text:$('#main h1 span').text() +" was exported successfully! Copy the export data and import it into a new website.", 
         css:"alert-success"
       }
     });
@@ -571,7 +571,7 @@ WebApp.methods({
       this.worker.postMessage({
         event:"Page:status", 
         data:{
-          text:"Web app imported successfully!",
+          text:"Web app was imported successfully!",
           css: "alert-success"
         }
       });  
@@ -585,7 +585,7 @@ WebApp.methods({
     this.worker.postMessage({
       event:"Page:status", 
       data:{
-        text:"Web app imported successfully!",
+        text:"Web app was imported successfully!",
         css: "alert-success"
       }
     });  
