@@ -21,7 +21,7 @@ Page.methods({
         // Extract auth token from the cookie
         $.cookie.raw = true;
         this.authToken = $.cookie('siteAuthToken'); 
-        
+
         // Extract the siteID from partner portal link :D
         var urlParams = unserialize($('#PPLink', $(this.frameDoc)).attr("href"));
         if(urlParams.hasOwnProperty("ASID"))
@@ -75,7 +75,7 @@ Page.methods({
       var url = this.frame.location.href;
       
       // Check if we are on the Web App edit/create page
-      if( url && /Admin\/CustomContentType.aspx\?CustomContentID\=\d/.test(url)){
+      if( url && /Admin\/CustomContentType.aspx\?CustomContentID\=\-?\d/.test(url)){
         this.worker.postMessage({event:"Page:getContentType", data:Page.WEB_APP});
         return;
       }
@@ -141,7 +141,6 @@ Page.methods({
     // Helper method. Set inputs value from imported data
     setInputs: function(data, context){
       var self = this;
-      
       $.each(data, function(k, val){
         if(k == "rad"){
            // Set rad editor content if available
@@ -232,6 +231,7 @@ WebApp.methods({
     $('iframe:first').unbind('load');
     
     var data = {
+      name: $('#main h1 span').text(),
       details:this.extractInputs($('.hybridForm', $(this.frameDoc))),
       fields:{},
       layout:{},
@@ -372,17 +372,21 @@ WebApp.methods({
   exportAutoresponderTab:function(e){
     this.init();
     $('iframe:first').unbind('load');
-    var data = e.data;
+    var data = e.data
+       ,self = this;
+       
     data.autoresponder = this.extractInputs($(this.frameDoc));
     this.worker.postMessage({
       event:"Page:status", 
       data:{
-        text:$('#main h1 span').text() +" was exported successfully! Copy the export data and import it into a new website.", 
+        text:$('#main h1 span').text() +" Web App settings were stored to local storage. You can now switch to a different site and use the import functionality.", 
         css:"alert-success"
       }
     });
+    chrome.storage.local.set({webappdata:data}, function(){
+      self.worker.postMessage({event:"WebApp:exportSettings", data:data});
+    })
     
-    this.worker.postMessage({event:"WebApp:exportSettings", data:data});
   },
   
   /******************************************************************************************************************************************
@@ -395,7 +399,7 @@ WebApp.methods({
     this.worker.postMessage({
       event:"Page:status", 
       data:{
-        text:"Importing web app settings started."
+        text:"Importing "+(data.name||"")+"web app settings started."
       }
     });
     
@@ -433,6 +437,10 @@ WebApp.methods({
       if(data)
         settings = JSON.parse(data);
       
+      // Reset all visible inputs
+      $('input[type=text]:visible, textarea:visible, select:visible', context).val(null)
+      $('input[type=checkbox]:visible, input[type=radio]:visible', context).attr('checked', false);   
+      
       this.setInputs(settings.details, context);
       
       $('iframe:first').bind('load', settings, $.proxy(this.importFieldsTab, this));
@@ -461,29 +469,41 @@ WebApp.methods({
   
   addField: function(e){
     this.init();
-    $('iframe:first').unbind('load');
     
     if($(e.target).is('#systemNotificationQueue') && $('#systemNotificationQueue').text() != ""){
+      $('#systemNotificationQueue').html("");
       return;
     }
     
+    $('iframe:first').unbind('load');
+
     var data = e.data
         ,self = this
         ,context = $(this.frameDoc)
         ,field
-        ,locationParams = unserialize(this.frame.location.search)
+        ,locationParams = unserialize(this.frame.location.search);
     
     // Navigate to layout tab if there are any fields
     if( data.fields.length == 0 ){
       $('iframe:first').bind('load', data, $.proxy(this.importLayoutTab, this));
-      setTimeout($.proxy(this.navigate, this), 1000, 2)
+      this.navigate(2);
       return;
     }
     
     fieldData = data.fields.shift();
-    this.setInputs(fieldData, context);
+    while( fieldData && fieldData.hasOwnProperty('ctl00_cp_uc_txtItemName') && $('#ctl00_cp_uc_listFormItems option:contains("'+fieldData["ctl00_cp_uc_txtItemName"]+'")', context).length){
+      console.log("Field "+fieldData["ctl00_cp_uc_txtItemName"]+" exists. Skipping...");
+      fieldData = data.fields.shift();
+    }
     
-    $('#ctl00_cp_uc_btnAdd', $(self.frameDoc)).trigger('click');
+    if(!fieldData){
+      $('iframe:first').bind('load', data, $.proxy(this.importLayoutTab, this));
+      this.navigate(2);
+      return;
+    }
+    
+    this.setInputs(fieldData, context);
+    $('#ctl00_cp_uc_btnAdd', context).trigger('click');
     
   },
   
@@ -581,11 +601,11 @@ WebApp.methods({
     
     this.setInputs(data.autoresponder, context);
     $('#ctl00_cp_uc_btnSubmit', context).trigger('click');
-  
+    
     this.worker.postMessage({
       event:"Page:status", 
       data:{
-        text:"Web app was imported successfully!",
+        text:"Web app "+(data.name||"")+" was imported successfully!",
         css: "alert-success"
       }
     });  

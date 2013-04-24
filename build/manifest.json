@@ -4,7 +4,7 @@
   "description": "This extension makes BC web apps importing/exporting easier",
   "version": "0.0.0.1",
   "background": { "scripts": ["scripts/background.min.js"] },
-  "permissions": ["tabs", "clipboardRead", "clipboardWrite"],
+  "permissions": ["tabs", "clipboardRead", "clipboardWrite", "storage"],
   "icons":{
     "48":"assets/img/logo_48.png"
   },

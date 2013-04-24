@@ -21,7 +21,7 @@ Page.methods({
         // Extract auth token from the cookie
         $.cookie.raw = true;
         this.authToken = $.cookie('siteAuthToken'); 
-        
+
         // Extract the siteID from partner portal link :D
         var urlParams = unserialize($('#PPLink', $(this.frameDoc)).attr("href"));
         if(urlParams.hasOwnProperty("ASID"))
@@ -75,7 +75,7 @@ Page.methods({
       var url = this.frame.location.href;
       
       // Check if we are on the Web App edit/create page
-      if( url && /Admin\/CustomContentType.aspx\?CustomContentID\=\d/.test(url)){
+      if( url && /Admin\/CustomContentType.aspx\?CustomContentID\=\-?\d/.test(url)){
         this.worker.postMessage({event:"Page:getContentType", data:Page.WEB_APP});
         return;
       }
@@ -141,7 +141,6 @@ Page.methods({
     // Helper method. Set inputs value from imported data
     setInputs: function(data, context){
       var self = this;
-      
       $.each(data, function(k, val){
         if(k == "rad"){
            // Set rad editor content if available

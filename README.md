@@ -15,7 +15,7 @@ You can copy this JSON and share it or use it to copy the web app configs on ano
 If you want to import an web app, go to Admin Console > *Add Web App*. Click the *BC* icon. Only the import tab is available. Paste the JSON with the web app configuration you want to import into the textarea and click *Import* button. Be patient and don't close the popup (see the note bellow) until the import is done.
 
 #### Note:
-* Don't click outside of the popup area or change the tab! This will close the popup and abort the export/import operation.
+Don't click outside of the popup area or change the tab! This will close the popup and abort the export/import operation.
 
 ## Credits
 
@@ -26,4 +26,3 @@ To create this extension we used:
 * [AngularJS](http://angularjs.org/)
 * [Twitter Bootstrap](http://twitter.github.io/bootstrap/) for UI
 * [Font Awesome](http://fortawesome.github.com/Font-Awesome/) for cool icons
-

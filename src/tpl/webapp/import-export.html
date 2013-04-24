@@ -18,7 +18,7 @@
         <p>
           Export <b>{{webApp.name}}</b> settings.
         </p>
-        <textarea ng-model="webAppSettings" class="input-block-level" rows="8" ng-show="webAppSettings"></textarea>
+        <textarea ng-model="webAppSettings" class="input-block-level" rows="8" ng-show="webAppSettings" name="exportedSettings"></textarea>
         <div class="form-actions">
           <button class="btn btn-primary" ng-disabled="webApp == null || loading || webApp.id == -1" ng-click="export()">
             <i class="icon-white icon-download"></i>

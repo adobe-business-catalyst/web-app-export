@@ -43,6 +43,7 @@ BC.run(['$rootScope','$location', function($rootScope, $location){
   });
     
   $rootScope.$on("Page:getContentType", function(e, data){
+    console.log(data)
     if(data == "WebApp"){
       $location.path('/web-app/import-export');
     }

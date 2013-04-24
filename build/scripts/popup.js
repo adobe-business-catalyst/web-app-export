@@ -43,6 +43,7 @@ BC.run(['$rootScope','$location', function($rootScope, $location){
   });
     
   $rootScope.$on("Page:getContentType", function(e, data){
+    console.log(data)
     if(data == "WebApp"){
       $location.path('/web-app/import-export');
     }
@@ -90,6 +91,7 @@ BC.controller('WebAppExportImport',['$scope', function($scope){
   $scope.$on("WebApp:importSettings", function(e, data){
     $scope.loading = false;
     $scope.importSettings = null;
+    chrome.storage.local.remove(['webappdata']);
     $scope.$apply();
   });
   
@@ -107,7 +109,7 @@ BC.controller('WebAppExportImport',['$scope', function($scope){
   });
   
   $scope.$on("WebApp:getInfo", function(e, data){
-    $scope.webApp = data;  
+    $scope.webApp = data;
     $scope.$apply();
   });
   
@@ -117,4 +119,20 @@ BC.controller('WebAppExportImport',['$scope', function($scope){
   });
   
   $scope.sendMessage({action:"WebApp:getInfo"});
+  
+  // Get web app settings stored into local storage.
+  chrome.storage.local.get(["webappdata"], function(data){
+    try{
+      $scope.importSettings = JSON.stringify(data.webappdata);
+      $scope.$apply();
+    }
+    catch(e){
+      $scope.message = {
+        text:"Invalid app data found.",
+        css:"alert-error"
+      }
+      chrome.storage.local.remove(['webappdata']);
+    }
+  });
+  
 }]);
