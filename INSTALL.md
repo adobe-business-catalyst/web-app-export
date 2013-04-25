@@ -8,3 +8,5 @@ Now you can export/import/share Adobe's Business Catalyst web apps easily.
 * Open Google Chrome and go to extensions management page ( type chrome://extensions/ in the address bar)
 * Check *Developer mode*
 * Click *Load unpacked extension* and select the *build* folder from the unziped extension folder
+
+You can find an screencast [here](http://www.screencast.com/t/N2R4lzIr7R)
