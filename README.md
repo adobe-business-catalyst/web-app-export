@@ -1,20 +1,20 @@
-Adobe Business Catalyst web app export/import Google Chrome extension.
+Adobe Business Catalyst web app export/import extension fot Google Chrome.
 ==
-Now you can export/import/share Adobe's Business Catalyst web apps easily.
+Now you can export/import/share Adobe's Business Catalyst web apps easily from within Google Chrome.
 
-## How does it works?
+## How does it work?
 
-First, install the extension. You can find it on [Google Web Store](https://chrome.google.com/webstore/category/home). If you want to install the latest build [follow this instructions](https://github.com/adobe-business-catalyst/web-app-export/blob/master/INSTALL.md)
+First, install the extension. You can find it on the [Google Web Store](https://chrome.google.com/webstore/detail/bc-web-app-config-importe/cclmieohbdngonpnlcacncndajnfcjoi?hl=en-US&gl=001). If you want to install the latest build [follow these instructions](https://github.com/adobe-business-catalyst/web-app-export/blob/master/INSTALL.md)
 
 ### Exporting web apps.
-If you want to export an existing web app, go to that app edit page. You will notice a little black *BC* icon will appear in the browser's address bar. Click on it. An popup will appear. Select the *Export* tab and press *Export* button and be patient. The extension will open every web app tab (Details/Fields/Layouts/Autoresponder) and extract the data from it. In the end, an textarea will appear filled with the web app settings in JSON format.
+If you want to export an existing web app, go to that app's Edit page. You will notice a little black [BC] icon will appear in the browser's address bar. Click on that icon and a popup dialogue will appear. Select the *Export* tab then press *Export* button and be patient. The Chrome extension will automatically open every web app tab (Details/Fields/Layouts/Autoresponder) and extract the data from it. In the end, a textarea will appear filled with the web app settings in JSON format.
 
-You can copy this JSON and share it or use it to copy the web app configs on another site.
+You can copy this JSON and share it or use it to copy the web app configs to another site.
 
 ### Importing web apps.
-If you want to import an web app, go to Admin Console > *Add Web App*. Click the *BC* icon. Only the import tab is available. Paste the JSON with the web app configuration you want to import into the textarea and click *Import* button. Be patient and don't close the popup (see the note bellow) until the import is done.
+If you want to import a web app, go to the Business Catalyst Admin Console and choose  *Add Web App*. Click the black [BC] icon in the address bar. Only the import tab will be available. Paste the JSON with the web app configuration you want to import into the textarea and click the *Import* button. Be patient and don't close the popup (see the note bellow) until the import is done.
 
-#### Note:
+#### Important Note:
 Don't click outside of the popup area or change the tab! This will close the popup and abort the export/import operation.
 
 ## Credits
