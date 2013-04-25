@@ -2,9 +2,9 @@
   "manifest_version": 2,
   "name": "BC Web app config import/export",
   "description": "This extension makes BC web apps importing/exporting easier",
-  "version": "0.0.0.1",
+  "version": "0.0.0.3",
   "background": { "scripts": ["scripts/background.min.js"] },
-  "permissions": ["tabs", "clipboardRead", "clipboardWrite", "storage"],
+  "permissions": ["tabs", "storage"],
   "icons":{
     "48":"assets/img/logo_48.png"
   },
@@ -25,7 +25,7 @@
       ],
       "js" : [
         "scripts/contentscript-libs.js",
-        "scripts/contentscript.js"
+        "scripts/contentscript.min.js"
       ],
       "run_at" : "document_start",
       "all_frames" : false
