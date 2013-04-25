@@ -1,4 +1,4 @@
-Adobe Business Catalyst web app export/import extension fot Google Chrome.
+Adobe Business Catalyst web app export/import extension for Google Chrome.
 ==
 Now you can export/import/share Adobe's Business Catalyst web apps easily from within Google Chrome.
 
