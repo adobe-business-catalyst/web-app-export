@@ -12,7 +12,7 @@ function unserialize(p){
   return ret;
 }
 
-// And the magic begins...
+// And the magic begin...
 $(document).ready(function(){
   var worker = null;
   

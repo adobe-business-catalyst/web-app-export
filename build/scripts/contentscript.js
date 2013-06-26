@@ -255,6 +255,7 @@ WebApp.methods({
 
   exportFieldsTab: function(e){
     this.init();
+    
     $('iframe:first').unbind('load');
     this.worker.postMessage({
       event:"Page:status", 
@@ -283,29 +284,35 @@ WebApp.methods({
         fields.push(inputs)    
       
       // This is a hack. Without this change, it will raise an error. 
-      // Change the onChange attribute. This is the correct way toa attach an setTimeout handler
-      $('#ctl00_cp_uc_listFormItems', context).attr('onchange', "javascript:setTimeout(function(){__doPostBack('ctl00$cp$uc$listFormItems','');}, 0)")    
+      // Change the onChange attribute. This is the correct way to attach an setTimeout handler
+      console.log($('#ctl00_cp_uc_listFormItems', context));
+      //$('#ctl00_cp_uc_listFormItems', context).attr('onchange', "javascript:setTimeout(function(){__doPostBack('ctl00$cp$uc$listFormItems','');},0)")    
+      $('#ctl00_cp_uc_listFormItems', context).attr('onchange', "");
       
       // Check if it is any field selected
       if($('#ctl00_cp_uc_listFormItems option:selected', context).length){
         $('#ctl00_cp_uc_listFormItems', context).
-          val($('#ctl00_cp_uc_listFormItems option:selected', context).next().attr('value')).
-          trigger('change')
+          val($('#ctl00_cp_uc_listFormItems option:selected', context).next().attr('value'))
       }else{
-        // Select the firs field
+        // Select the first field
         $('#ctl00_cp_uc_listFormItems', context).
-          val($('#ctl00_cp_uc_listFormItems option:first', context).attr('value')).
-          trigger('change')
+          val($('#ctl00_cp_uc_listFormItems option:first', context).attr('value'))
       }
+      
+      self.injectScript(function(){
+        setTimeout(function(){__doPostBack('ctl00$cp$uc$listFormItems','');},0);
+      }, self.frameDoc.body)
     }
-
+    
     context.on('DOMSubtreeModified','#ctl00_cp_uc_panelFieldDetails', function(e){
+      console.log(e.target);
       i++;
       if(i == 2){
         i=0;
         selectNextField();
       }
     });
+    
     selectNextField();
   },
   
@@ -628,7 +635,7 @@ function unserialize(p){
   return ret;
 }
 
-// And the magic begins...
+// And the magic begin...
 $(document).ready(function(){
   var worker = null;
   
