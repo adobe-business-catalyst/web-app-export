@@ -283,10 +283,7 @@ WebApp.methods({
       if(inputs)
         fields.push(inputs)    
       
-      // This is a hack. Without this change, it will raise an error. 
-      // Change the onChange attribute. This is the correct way to attach an setTimeout handler
-      console.log($('#ctl00_cp_uc_listFormItems', context));
-      //$('#ctl00_cp_uc_listFormItems', context).attr('onchange', "javascript:setTimeout(function(){__doPostBack('ctl00$cp$uc$listFormItems','');},0)")    
+      // Remove the doPostBack callback on dropdown change. We will do this manually later.
       $('#ctl00_cp_uc_listFormItems', context).attr('onchange', "");
       
       // Check if it is any field selected
@@ -299,13 +296,15 @@ WebApp.methods({
           val($('#ctl00_cp_uc_listFormItems option:first', context).attr('value'))
       }
       
+      // Do the postback
       self.injectScript(function(){
-        setTimeout(function(){__doPostBack('ctl00$cp$uc$listFormItems','');},0);
+        setTimeout(function(){
+          __doPostBack('ctl00$cp$uc$listFormItems','');
+        },0);
       }, self.frameDoc.body)
     }
     
     context.on('DOMSubtreeModified','#ctl00_cp_uc_panelFieldDetails', function(e){
-      console.log(e.target);
       i++;
       if(i == 2){
         i=0;
