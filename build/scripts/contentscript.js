@@ -130,7 +130,7 @@ Page.methods({
         }
         
         if( $(this).is('input[type=checkbox]') || $(this).is('input[type=radio]')){
-          result[$(this).attr('id')] = $(this).attr('checked') == 'checked' ? true : false;
+          result[$(this).attr('id')] = $(this).attr('checked') == 'checked'; 
         }
       });
       
@@ -161,11 +161,15 @@ Page.methods({
             $(id, context).val(val);
           }
           
-          if( $(id, context).is('input[type=checkbox]') || $(id, context).is('input[type=radio]')){
-            $(id, context).attr('checked', val)
+          if(($(id, context).is('input[type=checkbox]') || $(id, context).is('input[type=radio]')) && val == true){
+            $(id, context).attr('checked', 'checked')
           }
         }
       })
+    },
+    
+    disconnect:function(){
+      console.log('Cleanup..')
     }
 });
 
@@ -418,7 +422,6 @@ WebApp.methods({
       $('iframe:first').bind('load', data, $.proxy( this.importDetailsTab, this));
       this.navigate(0);
     }
-    
   },
   
   importDetailsTab:function(e, data){
@@ -444,14 +447,14 @@ WebApp.methods({
         settings = JSON.parse(data);
       
       // Reset all visible inputs
-      $('input[type=text]:visible, textarea:visible, select:visible', context).val(null)
-      $('input[type=checkbox]:visible, input[type=radio]:visible', context).attr('checked', false);   
+      //$('input[type=text]:visible, textarea:visible, select:visible', context).val(null)
+      //$('input[type=checkbox]:visible, input[type=radio]:visible', context).attr('checked', false);   
       
       this.setInputs(settings.details, context);
-      
       $('iframe:first').bind('load', settings, $.proxy(this.importFieldsTab, this));
-      
+           
       $(this.frameDoc).on('DOMSubtreeModified','.footerbuttons', function(e){
+        $(self.frameDoc).unbind('DOMSubtreeModified')
         self.navigate(1);
       });
         
@@ -606,8 +609,13 @@ WebApp.methods({
     }
     
     this.setInputs(data.autoresponder, context);
-    $('#ctl00_cp_uc_btnSubmit', context).trigger('click');
+    //$('#ctl00_cp_uc_btnSubmit', context).trigger('click');
     
+    this.injectScript(function(){
+      document.getElementById('ButtonID').value='save';
+      WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions("ctl00$cp$uc$btnSubmit", "", true, "", "", false, true))  
+    }, this.frameDoc.body);
+      
     this.worker.postMessage({
       event:"Page:status", 
       data:{
@@ -669,8 +677,15 @@ $(document).ready(function(){
     if(port.name == "BC"){
       worker = port;
       worker.onMessage.addListener(onMessage);
+      worker.onDisconnect.addListener(onDisconnect)
     }
   }
+  
+  // When disconnect, make some cleanup and stop execution.
+  var onDisconnect = function(port){
+    $('iframe:first').unbind('load');
+  }
+  
   chrome.runtime.onConnect.addListener(onConnect);
   
 });

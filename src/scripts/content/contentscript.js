@@ -47,8 +47,15 @@ $(document).ready(function(){
     if(port.name == "BC"){
       worker = port;
       worker.onMessage.addListener(onMessage);
+      worker.onDisconnect.addListener(onDisconnect)
     }
   }
+  
+  // When disconnect, make some cleanup and stop execution.
+  var onDisconnect = function(port){
+    $('iframe:first').unbind('load');
+  }
+  
   chrome.runtime.onConnect.addListener(onConnect);
   
 });

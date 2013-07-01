@@ -130,7 +130,7 @@ Page.methods({
         }
         
         if( $(this).is('input[type=checkbox]') || $(this).is('input[type=radio]')){
-          result[$(this).attr('id')] = $(this).attr('checked') == 'checked' ? true : false;
+          result[$(this).attr('id')] = $(this).attr('checked') == 'checked'; 
         }
       });
       
@@ -161,11 +161,15 @@ Page.methods({
             $(id, context).val(val);
           }
           
-          if( $(id, context).is('input[type=checkbox]') || $(id, context).is('input[type=radio]')){
-            $(id, context).attr('checked', val)
+          if(($(id, context).is('input[type=checkbox]') || $(id, context).is('input[type=radio]')) && val == true){
+            $(id, context).attr('checked', 'checked')
           }
         }
       })
+    },
+    
+    disconnect:function(){
+      console.log('Cleanup..')
     }
 });
 

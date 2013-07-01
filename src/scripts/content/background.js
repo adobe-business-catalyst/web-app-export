@@ -10,8 +10,6 @@ function init(tabId, changeInfo, tab) {
 chrome.tabs.onUpdated.addListener(init);
 
 function showIcon(url){
-  //var urlInfo = parse_url(url);
-  
   // WebApp edit/create page
   if(url && /AdminConsole\/\#\!\/Admin\/CustomContentType.aspx\?CustomContentID\=\-?\d/.test(url))
     return true;

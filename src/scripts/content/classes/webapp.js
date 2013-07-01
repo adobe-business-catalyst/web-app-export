@@ -242,7 +242,6 @@ WebApp.methods({
       $('iframe:first').bind('load', data, $.proxy( this.importDetailsTab, this));
       this.navigate(0);
     }
-    
   },
   
   importDetailsTab:function(e, data){
@@ -268,14 +267,14 @@ WebApp.methods({
         settings = JSON.parse(data);
       
       // Reset all visible inputs
-      $('input[type=text]:visible, textarea:visible, select:visible', context).val(null)
-      $('input[type=checkbox]:visible, input[type=radio]:visible', context).attr('checked', false);   
+      //$('input[type=text]:visible, textarea:visible, select:visible', context).val(null)
+      //$('input[type=checkbox]:visible, input[type=radio]:visible', context).attr('checked', false);   
       
       this.setInputs(settings.details, context);
-      
       $('iframe:first').bind('load', settings, $.proxy(this.importFieldsTab, this));
-      
+           
       $(this.frameDoc).on('DOMSubtreeModified','.footerbuttons', function(e){
+        $(self.frameDoc).unbind('DOMSubtreeModified')
         self.navigate(1);
       });
         
@@ -430,8 +429,13 @@ WebApp.methods({
     }
     
     this.setInputs(data.autoresponder, context);
-    $('#ctl00_cp_uc_btnSubmit', context).trigger('click');
+    //$('#ctl00_cp_uc_btnSubmit', context).trigger('click');
     
+    this.injectScript(function(){
+      document.getElementById('ButtonID').value='save';
+      WebForm_DoPostBackWithOptions(new WebForm_PostBackOptions("ctl00$cp$uc$btnSubmit", "", true, "", "", false, true))  
+    }, this.frameDoc.body);
+      
     this.worker.postMessage({
       event:"Page:status", 
       data:{
