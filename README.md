@@ -1,5 +1,12 @@
 Adobe Business Catalyst web app export/import extension for Google Chrome.
 ==
+
+##UPDATE
+Adobe has released the open platform (read more about it here : http://goo.gl/UqvR0R) lately. Now the web app items can be exported easily using the web apps REST API.
+Also, the Admin UI was changed. The extension was relying on the Admin UI html structure. This is the cause why is not working anymore.
+
+Maybe, if I have the time, I will build another one, that uses the REST APIs.
+
 Now you can export/import/share Adobe's Business Catalyst web apps easily from within Google Chrome.
 
 ## How does it work?
@@ -23,6 +30,6 @@ To create this extension we used:
 * [jQuery](http://jquery.com/) for DOM manipulation 
 * [Klass](https://github.com/ded/klass) for basic OOP 
 * [jQuery Cookie plugin](https://github.com/carhartl/jquery-cookie) for cookie manipulation
-* [AngularJS](http://angularjs.org/)
+* [AngularJS](http://angularjs.org/) for the magic
 * [Twitter Bootstrap](http://twitter.github.io/bootstrap/) for UI
 * [Font Awesome](http://fortawesome.github.com/Font-Awesome/) for cool icons
