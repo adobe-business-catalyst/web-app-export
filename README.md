@@ -3,7 +3,7 @@ Adobe Business Catalyst web app export/import extension for Google Chrome.
 
 ##UPDATE
 Adobe has released the open platform (read more about it here : http://goo.gl/UqvR0R) lately. Now the web app items can be exported easily using the web apps REST API.
-Also, the Admin UI was changed. The extension was relying on the Admin UI html structure. This is the cause why is not working anymore.
+Also, the Admin UI was changed. The extension was relying on the Admin UI html structure. This is the cause why is not working anymore. To backup your BC data you can use BackupBC http://www.backupbc.com/
 
 Maybe, if I have the time, I will build another one, that uses the REST APIs.
 
